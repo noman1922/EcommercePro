@@ -11,8 +11,8 @@
     <link rel="stylesheet" href="admin/assets/vendors/owl-carousel-2/owl.carousel.min.css">
     <link rel="stylesheet" href="admin/assets/vendors/owl-carousel-2/owl.theme.default.min.css">
     <!-- End plugin css for this page -->
-    <!-- inject:css -->
-    <!-- endinject -->
+
+
     <!-- Layout styles -->
     <link rel="stylesheet" href="admin/assets/css/style.css">
     <!-- End layout styles -->

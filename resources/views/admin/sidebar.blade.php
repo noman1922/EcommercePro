@@ -77,7 +77,6 @@
                 <li class="nav-item"> <a class="nav-link" href="{{url('/view_product')}}">Add Products</a></li>
 
                 <li class="nav-item"> <a class="nav-link" href="{{url('/show_product')}}">Show Products</a></li>
-                
               </ul>
             </div>
           </li>
