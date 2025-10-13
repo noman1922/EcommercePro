@@ -44,6 +44,14 @@
       <div class="hero_area">
          <!-- header section strats -->
          @include('home.header')
+
+         @if(session()->has('message'))
+            <div class="alert alert-success">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+                {{session()->get('message')}}
+            </div>
+
+          @endif
         
          
    
@@ -74,11 +82,21 @@
             <?php $totalprice=$totalprice + $cart->price ?>
             @endforeach
 
+
+
             
         </table>
+        <div>
+            <h1 style="font-size: 20px; padding: 40px;">Total Price: {{$totalprice}}.00</h1>
       </div>
+      <h1 style="font-size: 25px; padding-bottom: 15px;">
+            Proceed to Order
+        </h1>
+        <a href="{{url('cash_order')}}" class="btn btn-danger">Cash on Delivery</a>
+        <a href="" class="btn btn-danger">Pay Using Card</a>
+        </div>
       
-      @include('home.footer')
+     
       <!-- footer end -->
       <div class="cpy_">
          <p class="mx-auto">© 2021 All Rights Reserved By <a href="https://html.design/">Free Html Templates</a><br>
