@@ -10,6 +10,7 @@ use App\Models\Cart;
 use App\Models\Order;
 
 
+
 class Homecontroller extends Controller
 {
 
@@ -133,6 +134,10 @@ class Homecontroller extends Controller
         return redirect()->back()->with('message', 'We have received your order. We will connect with you soon...');
 
 
+    }
+    public function stripe($totalprice)
+    {
+        return view('home.stripe', compact('totalprice'));
     }
     
     
