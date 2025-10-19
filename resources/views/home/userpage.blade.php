@@ -52,9 +52,9 @@
       @include('home.footer')
       <!-- footer end -->
       <div class="cpy_">
-         <p class="mx-auto">© 2021 All Rights Reserved By <a href="https://html.design/">Free Html Templates</a><br>
+         <p class="mx-auto">© {{ date('Y') }} All Rights Reserved By <a href="https://noman1922.github.io/Portfolio/">Abdullah Al Nomna khan</a><br>
          
-            Distributed By <a href="https://themewagon.com/" target="_blank">ThemeWagon</a>
+              <a href="https://noman1922.github.io/Portfolio/" target="_blank">This template is made with  by Abdullah Al Noman khan</a>
          
          </p>
       </div>

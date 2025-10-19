@@ -52,6 +52,7 @@
                 <th style="padding: 10px;">Image</th>
                 <th style="padding: 10px;">Delivered</th>
                 <th style="padding: 10px;">Print PDF</th>
+                <th style="padding: 10px;">Send Email</th>
 
             </tr>
 
@@ -78,7 +79,12 @@
                 </td>
                 <td style="padding: 10px;">
                     <a class="btn btn-secondary" href="{{url('print_pdf', $order->id)}}">Print PDF</a>
-            </tr>
+                </td>
+
+                <td style="padding: 10px;">
+                    <a class="btn btn-info" href="{{url('send_email', $order->id)}}">Send Email</a>
+                </td>
+             </tr>
 
             @endforeach
 </div>
