@@ -38,6 +38,18 @@
           <div class="content-wrapper">
 
           <h1 class="title_deg">All Orders</h1>
+
+          <div style="padding-left: 400px; padding-bottom: 30px;">
+            <form action="{{url('search')}}" method="get">
+                @csrf
+                <input typr="text" name="search" placeholder="Search for something" style="color: black;">
+                <input type="submit" value="Search" class="btn btn-outline-primary">
+
+            </form>
+
+
+
+          </div>  
           <table>
             <tr style="background-color: grey;">
                 <th style="padding: 10px;">Name</th>
@@ -56,37 +68,45 @@
 
             </tr>
 
-            @foreach($order as $order)
-            <tr align="center" style="background-color: black;">
-                <td style="padding: 10px;">{{$order->name}}</td>
-                <td style="padding: 10px;">{{$order->email}}</td>
-                <td style="padding: 10px;">{{$order->phone}}</td>
-                <td style="padding: 10px;">{{$order->address}}</td>
-                <td style="padding: 10px;">{{$order->product_title}}</td>
-                <td style="padding: 10px;">{{$order->quantity}}</td>
-                <td style="padding: 10px;">{{$order->price}}</td>
-                <td style="padding: 10px;">{{$order->payment_status}}</td>
-                <td style="padding: 10px;">{{$order->delivery_status}}</td>
-                <td style="padding: 10px;">
-                    <img height="100" width="100" src="/product/{{$order->image}}">
+            @forelse ($order as $item)
+                <tr align="center" style="background-color: black;">
+            <td style="padding: 10px;">{{ $item->name }}</td>
+            <td style="padding: 10px;">{{ $item->email }}</td>
+            <td style="padding: 10px;">{{ $item->phone }}</td>
+            <td style="padding: 10px;">{{ $item->address }}</td>
+            <td style="padding: 10px;">{{ $item->product_title }}</td>
+            <td style="padding: 10px;">{{ $item->quantity }}</td>
+            <td style="padding: 10px;">{{ $item->price }}</td>
+            <td style="padding: 10px;">{{ $item->payment_status }}</td>
+            <td style="padding: 10px;">{{ $item->delivery_status }}</td>
+            <td style="padding: 10px;">
+                <img height="100" width="100" src="/product/{{ $item->image }}">
+            </td>
+            <td style="padding: 10px;">
+                @if($item->delivery_status=='processing')
+                    <a class="btn btn-primary" href="{{ url('delivered', $item->id) }}" onclick="return confirm('Are You Sure This Product is delivered!!!')">Delivered</a>
+                @else
+                                <p style="color: green;">Delivered</p>
+                @endif
                 </td>
                 <td style="padding: 10px;">
-                   @if($order->delivery_status=='processing')
-                    <a class="btn btn-primary" href="{{url('delivered', $order->id)}}" onclick="return confirm('Are You Sure This Product is delivered!!!')">Delivered</a>
-                   @else
-                    <p style="color: green;">Delivered</p>
-                    @endif
+                    <a class="btn btn-secondary" href="{{ url('print_pdf', $item->id) }}">Print PDF</a>
                 </td>
                 <td style="padding: 10px;">
-                    <a class="btn btn-secondary" href="{{url('print_pdf', $order->id)}}">Print PDF</a>
+                <a class="btn btn-info" href="{{ url('send_email', $item->id) }}">Send Email</a>
                 </td>
+            </tr>
 
-                <td style="padding: 10px;">
-                    <a class="btn btn-info" href="{{url('send_email', $order->id)}}">Send Email</a>
-                </td>
-             </tr>
+            @empty
+                <tr>
+                    <td colspan="16">
+                        No Data Found
+                    </td>
+                </tr>
 
-            @endforeach
+
+
+            @endforelse
 </div>
 </div>
 

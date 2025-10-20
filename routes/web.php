@@ -50,6 +50,10 @@ route::get('/send_email/{id}', [AdminController::class, 'send_email']);
 
 route::post('/send_user_email/{id}', [AdminController::class, 'send_user_email']);
 
+route::get('/search', [AdminController::class, 'searchdata']);
+
+
+
 
 
 
