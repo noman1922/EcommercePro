@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\Comment;
 use App\Models\Reply;
 
+
 use Session;
 
 use Stripe;
@@ -69,44 +70,69 @@ class Homecontroller extends Controller
         return view('home.product_details', compact('product'));
     }
      public function add_cart(Request $request, $id)
-    {
-        // Require login — or remove this and allow guest flows explicitly
-        if (!Auth::check()) {
-            return redirect('login');
-        }
+{
+    // Require login
+    if (!Auth::check()) {
+        return redirect('login');
+    }
 
-        // Validate quantity (you can add other fields if your form posts them)
-        $request->validate([
-            'quantity' => 'nullable|integer|min:1',
-        ]);
+    // Validate quantity
+    $request->validate([
+        'quantity' => 'nullable|integer|min:1',
+    ]);
 
-        // Get product or fail
-        $product = Product::findOrFail($id);
+    // Get the product
+    $product = Product::findOrFail($id);
 
-        // CREATE the Cart instance BEFORE assigning properties
-        $cart = new Cart();
+    // Check if this product already exists in user's cart
+    $cart = Cart::where('product_id', $product->id)
+        ->where('user_id', Auth::id())
+        ->first();
 
-        // REQUIRED: set the user id so the INSERT will include it
-        $cart->user_id = Auth::id();
+    if ($cart) {
+        // Increase quantity
+        $cart->quantity += $request->input('quantity', 1);
 
-        // use posted values if present or sensible defaults
-        $cart->name = $request->input('name', Auth::user()->name ?? 'user');
-        $cart->email = $request->input('email', Auth::user()->email ?? '');
-        $cart->phone = $request->input('phone', '');
-        $cart->address = $request->input('address', '');
-        $cart->product_title = $product->title ?? $request->input('product_title', '');
-        // prefer discount price if present and > 0, otherwise use regular price
-        $cart->price = (!empty($product->discount_price) && $product->discount_price > 0)
-        ? $product->discount_price
-        : $product->price;
-        $cart->image = $product->image ?? '';
-        $cart->product_id = $product->id;
-        $cart->quantity = $request->input('quantity', 1);
+        // ✅ Use discount price if available, otherwise normal price
+        $pricePerItem = (!empty($product->discount_price) && $product->discount_price > 0)
+            ? $product->discount_price
+            : $product->price;
+
+        // Update total price based on quantity
+        $cart->price = $cart->quantity * $pricePerItem;
 
         $cart->save();
 
-        return redirect()->back()->with('message', 'Product Added Successfully to Cart');
+        return redirect()->back()->with('message', 'Product quantity updated in Cart');
     }
+
+    // Create new cart entry
+    $cart = new Cart();
+    $cart->user_id = Auth::id();
+    $cart->product_id = $product->id;
+    $cart->product_title = $product->title;
+    $cart->image = $product->image ?? '';
+    $cart->quantity = $request->input('quantity', 1);
+
+    // ✅ Use discount price if available
+    $pricePerItem = (!empty($product->discount_price) && $product->discount_price > 0)
+        ? $product->discount_price
+        : $product->price;
+
+    // Store total price for this product (quantity × unit price)
+    $cart->price = $cart->quantity * $pricePerItem;
+
+    // Optional user info fields
+    $cart->name = Auth::user()->name ?? 'user';
+    $cart->email = Auth::user()->email ?? '';
+    $cart->phone = $request->input('phone', '');
+    $cart->address = $request->input('address', '');
+
+    $cart->save();
+
+    return redirect()->back()->with('message', 'Product Added Successfully to Cart');
+}
+
     public function show_cart()
     {
         if (Auth::id())
@@ -313,7 +339,37 @@ class Homecontroller extends Controller
 
         
     }
+
+    public function product_search(Request $request)
+    {
+        $search_text=$request->search;
+        $product=Product::where('title','LIKE',"%$search_text%")->orWhere('catagory','LIKE',"%$search_text%")->paginate(10);
+        $comment=Comment::orderby('id', 'desc')->get();
+        $reply=Reply::all();
+        return view('home.userpage', compact('product' , 'comment' , 'reply'));
+    }
     
+   public function products()
+    {
+    $product = Product::paginate(10);
+    $comment = Comment::orderBy('id', 'desc')->get();
+    $reply = Reply::all();
+    return view('home.all_product', compact('product', 'comment', 'reply'));
+    }
+    
+
+    public function search_product(Request $request)
+    {
+        $search_text=$request->search;
+        $product=Product::where('title','LIKE',"%$search_text%")->orWhere('catagory','LIKE',"%$search_text%")->paginate(10);
+        $comment=Comment::orderby('id', 'desc')->get();
+        $reply=Reply::all();
+        return view('home.all_product', compact('product' , 'comment' , 'reply'));
+    }
+
+  
+
+
     
     
 }
