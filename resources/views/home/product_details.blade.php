@@ -105,5 +105,8 @@
       <script src="home/js/bootstrap.js"></script>
       <!-- custom js -->
       <script src="home/js/custom.js"></script>
+      <script src="{{ asset('vendor/sweetalert/sweetalert.all.js') }}"></script>
+@include('sweetalert::alert')
+
    </body>
 </html>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
    <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
       <!-- Basic -->
       <meta charset="utf-8" />
       <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -21,23 +22,67 @@
       <!-- responsive style -->
       <link href="{{asset('home/css/responsive.css')}}" rel="stylesheet" />
       <style type="text/css">
-        .center
-        {
-            margin: auto;
-            width: 50%;
-            padding: 30px;
-            text-align: center;
-        }
-        table, th, td
-        {
-            border: 1px solid grey;
-        }
-        .th_deg
-        {
-            font-size: 20px;
-            padding: 5px;
-            background: skyblue;
-        }
+        .center {
+    margin: 50px auto;
+    width: 80%;              /* wider for better balance */
+    max-width: 900px;        /* prevent it from stretching too much */
+    padding: 30px;
+    text-align: center;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid grey;
+}
+
+.th_deg {
+    font-size: 20px;
+    padding: 10px;
+    background: skyblue;
+}
+
+td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+td img {
+    width: 120px;         /* fixed image size */
+    height: auto;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+/* Make table responsive for mobile */
+@media (max-width: 768px) {
+    .center {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .th_deg {
+        font-size: 16px;
+        padding: 6px;
+    }
+
+    td {
+        font-size: 14px;
+        padding: 6px;
+    }
+
+    td img {
+        width: 80px;
+    }
+}
+   
+
        </style>
    </head>
    <body>
@@ -75,7 +120,7 @@
                 <td>{{$cart->price}}</td>
                 <td><img src="/product/{{$cart->image}}"></td>
                 <td style="padding: 10px; font-size: 15px;">
-                    <a class="btn btn-danger" href="{{url('remove_cart',$cart->id)}}" onclick="return confirm('Are you sure to delete this?')">Remove Product</a>
+                    <a class="btn btn-danger" href="{{url('remove_cart',$cart->id)}}" onclick="confirmation(event)">Remove Product</a>
                 </td>
             </tr>
 
@@ -98,13 +143,35 @@
       
      
       <!-- footer end -->
-      <div class="cpy_">
-         <p class="mx-auto">© 2021 All Rights Reserved By <a href="https://html.design/">Free Html Templates</a><br>
-         
-            Distributed By <a href="https://themewagon.com/" target="_blank">ThemeWagon</a>
-         
-         </p>
-      </div>
+      
+
+      <script>
+      function confirmation(ev) {
+        ev.preventDefault();
+        var urlToRedirect = ev.currentTarget.getAttribute('href');  
+        console.log(urlToRedirect); 
+        swal({
+            title: "Are you sure to cancel this product",
+            text: "You will not be able to revert this!",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+        .then((willCancel) => {
+            if (willCancel) {
+
+
+                 
+                window.location.href = urlToRedirect;
+               
+            }  
+
+
+        });
+
+        
+    }
+</script>
       <!-- jQery -->
       <script src="home/js/jquery-3.4.1.min.js"></script>
       <!-- popper js -->

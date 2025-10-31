@@ -10,6 +10,7 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Comment;
 use App\Models\Reply;
+use RealRashid\SweetAlert\Facades\Alert;
 
 
 use Session;
@@ -68,8 +69,11 @@ class Homecontroller extends Controller
     {
         $product=Product::find($id);
         return view('home.product_details', compact('product'));
+        
     }
-     public function add_cart(Request $request, $id)
+
+    
+public function add_cart(Request $request, $id)
 {
     // Require login
     if (!Auth::check()) {
@@ -103,7 +107,10 @@ class Homecontroller extends Controller
 
         $cart->save();
 
-        return redirect()->back()->with('message', 'Product quantity updated in Cart');
+        // ✅ SweetAlert message for quantity update
+        \RealRashid\SweetAlert\Facades\Alert::success('Success', 'Product quantity updated in Cart');
+
+        return redirect()->back();
     }
 
     // Create new cart entry
@@ -130,8 +137,12 @@ class Homecontroller extends Controller
 
     $cart->save();
 
-    return redirect()->back()->with('message', 'Product Added Successfully to Cart');
+    // ✅ SweetAlert message for new add
+    \RealRashid\SweetAlert\Facades\Alert::success('Success', 'Product Added Successfully to Cart');
+
+    return redirect()->back();
 }
+
 
     public function show_cart()
     {

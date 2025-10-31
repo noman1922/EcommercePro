@@ -20,14 +20,21 @@
                         <li class="nav-item">
                            <a class="nav-link" href="{{url('products')}}">Products</a>
                         </li>
+                        
                         <li class="nav-item">
-                           <a class="nav-link" href="blog_list.html">Blog</a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link" href="contact.html">Contact</a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link" href="{{url('show_cart')}}">Cart</a>
+                           @auth
+            @php
+            // Count how many items are in the current user's cart
+            $cartCount = \App\Models\Cart::where('user_id', Auth::id())->count();
+            @endphp
+            <a class="nav-link" href="{{ url('show_cart') }}">
+            Cart({{ $cartCount }})
+            </a>
+            @else
+            <a class="nav-link" href="{{ url('show_cart') }}">
+            Cart
+            </a>
+            @endauth
                         </li>
                         <li class="nav-item">
                            <a class="nav-link" href="{{url('show_order')}}">Order</a>
