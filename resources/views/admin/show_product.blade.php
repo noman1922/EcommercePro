@@ -83,7 +83,7 @@
                     <img class="img_size" src="/product/{{$product->image}}">
                 </td>
                 <td>
-                    <a class="btn btn-danger" onclick="return confirm('Are you sure to delete this')" href="{{url('delete_product', $product->id)}}">Delete</a>
+                    <a class="btn btn-danger delete-btn" href="{{url('delete_product', $product->id)}}">Delete</a>
                 </td>
                 <td>
                     <a class="btn btn-primary" href="{{url('update_product', $product->id)}}">Edit</a>
@@ -98,5 +98,34 @@
     <!-- plugins:js -->
     @include('admin.script')
     <!-- End custom js for this page -->
+        <!-- SweetAlert2 confirmation for Delete on show_product -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.delete-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var url = btn.getAttribute('href');
+
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: 'This will permanently delete the product.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes, delete it!',
+                            cancelButtonText: 'Cancel',
+                            allowOutsideClick: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // navigate to delete route (server will handle deletion)
+                                window.location = url;
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
   </body>
 </html>

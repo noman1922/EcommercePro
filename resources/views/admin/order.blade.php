@@ -84,13 +84,13 @@
             </td>
             <td style="padding: 10px;">
                 @if($item->delivery_status=='processing')
-                    <a class="btn btn-primary" href="{{ url('delivered', $item->id) }}" onclick="return confirm('Are You Sure This Product is delivered!!!')">Delivered</a>
+                    <a class="btn btn-primary delivered-btn" href="{{ url('delivered', $item->id) }}">Delivered</a>
                 @else
-                                <p style="color: green;">Delivered</p>
+                    <p style="color: green;">Delivered</p>
                 @endif
                 </td>
                 <td style="padding: 10px;">
-                    <a class="btn btn-secondary" href="{{ url('print_pdf', $item->id) }}">Print PDF</a>
+                    <a class="btn btn-secondary" href="{{ url('print_pdf', $item->id) }}" target="_blank" rel="noopener noreferrer">Print PDF</a>
                 </td>
                 <td style="padding: 10px;">
                 <a class="btn btn-info" href="{{ url('send_email', $item->id) }}">Send Email</a>
@@ -115,5 +115,52 @@
     <!-- plugins:js -->
     @include('admin.script')
     <!-- End custom js for this page -->
+     <script>
+    // Save scroll position before the page unloads
+    window.addEventListener("beforeunload", function () {
+        localStorage.setItem("scrollPosition", window.scrollY);
+    });
+
+    // Restore scroll position when page loads
+    window.addEventListener("load", function () {
+        let scrollPosition = localStorage.getItem("scrollPosition");
+        if (scrollPosition) {
+            window.scrollTo(0, scrollPosition);
+            localStorage.removeItem("scrollPosition"); // optional: remove after use
+        }
+    });
+</script>
+
+        <!-- SweetAlert2 confirmation for Delivered -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // delegate to delivered buttons
+                document.querySelectorAll('.delivered-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var url = btn.getAttribute('href');
+
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "Mark this order as delivered?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes, Delivered',
+                            cancelButtonText: 'Cancel',
+                            allowOutsideClick: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // proceed to the delivered route
+                                window.location = url;
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
+
   </body>
 </html>

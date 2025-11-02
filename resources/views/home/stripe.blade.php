@@ -49,7 +49,7 @@
 
     <div class="row">
 
-        <div class="col-md-6 col-md-offset-3">
+    <div class="col-md-8 col-md-offset-2">
 
             <div class="panel panel-default credit-card-box">
 
@@ -77,21 +77,26 @@
 
     
 
-                    <form style=" font-size: 18px;"
+                                        <style>
+                                            /* Make the card form wider and more readable */
+                                            .credit-card-box{ max-width:820px; margin:0 auto; }
+                                            .credit-card-box .panel-title{ font-size:20px; font-weight:600; }
+                                            .credit-card-box .form-control{ font-size:16px; padding:12px; }
+                                            .credit-card-box label{ font-weight:600; }
+                                            @media (max-width:767px){
+                                                .credit-card-box{ padding:0 15px; }
+                                                .credit-card-box .form-control{ font-size:15px; }
+                                            }
+                                        </style>
 
-                            role="form" 
-
-                            action="{{ route('stripe.post',$totalprice) }}" 
-
-                            method="post" 
-
-                            class="require-validation"
-
-                            data-cc-on-file="false"
-
-                            data-stripe-publishable-key="{{ env('STRIPE_KEY') }}"
-
-                            id="payment-form">
+                                        <form style="font-size: 18px;"
+                                                    role="form"
+                                                    action="{{ route('stripe.post', $totalprice) }}"
+                                                    method="post"
+                                                    class="require-validation"
+                                                    data-cc-on-file="false"
+                                                    data-stripe-publishable-key="{{ env('STRIPE_KEY') }}"
+                                                    id="payment-form">
 
                         @csrf
 
@@ -103,7 +108,7 @@
 
                                 <label class='control-label'>Name on Card</label> 
 
-                                <input class='form-control' size='8' type='text'>
+                                <input class='form-control' size='8' type='text' name="name">
 
                                     
 
@@ -118,8 +123,7 @@
                             <div class='col-xs-12 form-group card required'>
 
                                 <label class='control-label'>Card Number</label> 
-                                <input autocomplete='off' class='form-control card-number' size='20'
-
+                                <input autocomplete='off' class='form-control card-number' size='20' inputmode="numeric" pattern="[0-9 ]+"
                                     type='text'>
 
 
@@ -333,13 +337,27 @@ $(function() {
 
             var token = response['id'];
 
-                 
-
-            $form.find('input[type=text]').empty();
-
+            // clear text inputs for safety and append token
+            $form.find('input[type=text]').val('');
             $form.append("<input type='hidden' name='stripeToken' value='" + token + "'/>");
 
-            $form.get(0).submit();
+            // Submit via AJAX so we can redirect the user on success
+            var actionUrl = $form.attr('action');
+            var formData = $form.serialize();
+
+            $.ajax({
+                url: actionUrl,
+                method: 'POST',
+                data: formData,
+                success: function(resp) {
+                    // Redirect to the user's orders page after successful payment
+                    window.location.href = "{{ url('') }}";
+                },
+                error: function() {
+                    // fallback: go to userpage
+                    window.location.href = "{{ url('show_cart') }}";
+                }
+            });
 
         }
 

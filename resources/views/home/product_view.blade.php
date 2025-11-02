@@ -29,15 +29,15 @@
                            <a href="{{url('product_details',$products->id)}}" class="option1">
                            Product Details
                            </a>
-                           <form action="{{url('add_cart',$products->id)}}" method="POST">
+                           <form action="{{url('add_cart',$products->id)}}" method="POST" class="add-to-cart-form">
                            @csrf
                               <div class="row">
                                  <div class="col-md-4">
-                                    <input type="number" value="1" min="1" style="width: 100px;">
+                                    <input type="number" name="quantity" value="1" min="1" style="width: 100px;">
                                  </div>
                               
                               <div class="col-md-4">
-                                 <input type="submit" value="Add to Cart">
+                                 <input type="submit" value="Add to Cart" class="btn btn-primary add-to-cart-btn">
                               </div>
                            </div>
                             </form>
@@ -82,5 +82,41 @@
             <span style="padding-top: 20px;">
             {!!$product->withQueryString()->links('pagination::bootstrap-5')!!}
             </span>
-         </div>
-      </section>
+             </div>
+         </section>
+
+            <!-- SweetAlert2: Show a centered success modal when Add to Cart is pressed -->
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+               document.querySelectorAll('.add-to-cart-form').forEach(function(form) {
+                  form.addEventListener('submit', function(e) {
+                     // prevent immediate submission so we can show the modal
+                     e.preventDefault();
+                     var submitBtn = form.querySelector('input[type="submit"]');
+                     if (submitBtn) submitBtn.disabled = true;
+
+                     Swal.fire({
+                        title: 'Success',
+                        text: 'Product Added Successfully to Cart',
+                        icon: 'success',
+                        showCancelButton: false,
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        willClose: () => {
+                           // optional: could re-enable the button here if needed
+                        }
+                     }).then((result) => {
+                        // result.isConfirmed -> user pressed OK
+                        // result.dismiss === Swal.DismissReason.timer -> auto closed after timer
+                        // submit the form in either case
+                        form.submit();
+                     });
+                  });
+               });
+            });
+            </script>

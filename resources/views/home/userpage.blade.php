@@ -164,5 +164,23 @@
       <script src="{{ asset('vendor/sweetalert/sweetalert.all.js') }}"></script>
 @include('sweetalert::alert')
 
+      <!-- SweetAlert2 toast for payment success -->
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      @if(session()->has('payment_success') || session()->has('success'))
+      <script>
+         document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+               toast: true,
+               position: 'top-end',
+               icon: 'success',
+               title: "{{ addslashes(session('payment_success') ?? session('success')) }}",
+               showConfirmButton: false,
+               timer: 4000,
+               timerProgressBar: true
+            });
+         });
+      </script>
+      @endif
+
    </body>
 </html>
