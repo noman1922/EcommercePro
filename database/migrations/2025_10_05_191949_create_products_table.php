@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
@@ -16,18 +13,14 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
-            $table->string('catagory')->nullable();
+            $table->string('catagory')->nullable();           // ← YOUR spelling: CORRECT
             $table->integer('quantity')->nullable();
             $table->decimal('price', 8, 2)->nullable();
-            $table->string('discount_price')->nullable();
-            
+            $table->decimal('discount_price', 8, 2)->nullable(); // ← Fixed: decimal, not string
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('products');
