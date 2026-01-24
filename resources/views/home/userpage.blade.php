@@ -1,146 +1,146 @@
-<!DOCTYPE html>
-<html>
-   <head>
-      <!-- Basic -->
-      <meta charset="utf-8" />
-      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-      <!-- Mobile Metas -->
-      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-      <!-- Site Metas -->
-      <meta name="keywords" content="" />
-      <meta name="description" content="" />
-      <meta name="author" content="" />
-      <link rel="shortcut icon" href="images/favicon.png" type="">
-      <title>Famms - Fashion HTML Template</title>
-      <!-- bootstrap core css -->
-      <link rel="stylesheet" type="text/css" href="{{asset('home/css/bootstrap.css')}}" />
-      <!-- font awesome style -->
-      <link href="{{asset('home/css/font-awesome.min.css')}}" rel="stylesheet" />
-      <!-- Custom styles for this template -->
-      <link href="{{asset('home/css/style.css')}}" rel="stylesheet" />
-      <!-- responsive style -->
-      <link href="{{asset('home/css/responsive.css')}}" rel="stylesheet" />
+@extends('layouts.home')
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-   </head>
-   <body>
+@section('title', 'EcommercePro | Discover Premium Fashion')
 
-   @include('sweetalert::alert')
-      <div class="hero_area">
-         <!-- header section strats -->
-         @include('home.header')
-         <!-- end header section -->
-         <!-- slider section -->
-         @include('home.slider')
-         <!-- end slider section -->
-      </div>
-      <!-- why section -->
-      @include('home.why')
-      <!-- end why section -->
-      
-      <!-- arrival section -->
-     @include('home.new_arrival')
-      <!-- end arrival section -->
-      
-      <!-- product section -->
-      @include('home.product')
+@section('content')
+    <!-- Hero Slider Area -->
+    <div class="relative overflow-hidden bg-white">
+        @include('home.slider')
+    </div>
 
-      <!-- comment and reply sytem starts here-->
+    <!-- Features Section -->
+    <div class="py-12 bg-white">
+        @include('home.why')
+    </div>
 
-      <div style="text-align: center; padding-bottom:30px;">
-         <h1 style="font-size: 30px; text-align: center; padding-top:20px; padding-bottom:20px;">Comments</h1>
-         <form action="{{ url('add_comment') }}" method="POST">
-            @csrf
-            <textarea style="height: 150px; width: 600px;" placeholder="Comment something here" name="comment"></textarea>
-            <br>
-            <input type="submit" class="btn btn-primary" value="Comment">
+    <!-- New Arrivals Section -->
+    <div class="py-16">
+        @include('home.new_arrival')
+    </div>
 
+    <!-- Products Collection -->
+    <section class="py-20" id="products">
+        <div class="container mx-auto px-4">
+            @include('home.product')
+        </div>
+    </section>
 
-         </form>
-      </div>
-      <div>
-         <h1 style="font-size: 30px; text-align: center; padding-top:20px; padding-bottom:20px;">All Comments</h1>
-         @foreach($comment as $comment)
-         <div style="padding-left: 20%; padding-bottom: 30px;">
-            <b>{{$comment->name}}</b>
-            <p>{{$comment->comment}}</p>
-            <a href="javascript:void(0);" style="color: blue;" onclick="reply(this)" data-commentid="{{ $comment->id }}">Reply</a>
-
-
-
-            @foreach($reply as $rep)
-               @if($rep->comment_id==$comment->id)
-            <div style="padding-left: 3%; padding-bottom: 10px;">
-                  
-                     <b>{{$rep->name}}</b>
-                     <p>{{$rep->reply}}</p>
+    <!-- Comments Section (Upgraded) -->
+    <section class="py-20 bg-gray-50 border-t border-gray-100">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Community Voice</h2>
+                <p class="mt-3 text-lg text-gray-500">Share your thoughts or ask questions about our collections.</p>
             </div>
-               @endif
-               @endforeach
-         </div>
-         @endforeach
-         <div style="display: none;" class="replyDiv">
 
-         <form action="{{ url('add_reply') }}" method="POST">
-            @csrf
-         
-         <input type="text" id="commentId" name="commentId" hidden="">
-         <textarea name="reply" style="height: 100px; width: 500px; margin-left:20%;" placeholder="Reply something here"></textarea>
+            <!-- Comment Form -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-16 transform transition hover:shadow-md">
+                <form action="{{ url('add_comment') }}" method="POST" class="space-y-6">
+                    @csrf
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Leave a Comment</label>
+                        <textarea 
+                            name="comment" 
+                            rows="4" 
+                            class="w-full px-4 py-3 rounded-xl border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" 
+                            placeholder="What's on your mind?..." 
+                            required
+                        ></textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all">Post Comment</button>
+                    </div>
+                </form>
+            </div>
 
-         <br>
-         <button type="submit" class="btn btn-warning">Reply</button>
-         <a href="javascript::void(0);" class="btn" onclick="reply_close(this)">Close</a>
+            <!-- Comments List -->
+            <div class="space-y-8">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <i class="far fa-comments mr-3 text-indigo-500"></i>
+                    Recent Discussions
+                </h3>
+                
+                @foreach($comment as $item)
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg mr-3 uppercase">
+                                    {{ substr($item->name, 0, 1) }}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">{{ $item->name }}</h4>
+                                    <span class="text-xs text-gray-400 font-medium">{{ $item->created_at->diffForHumans() }}</span>
+                                </div>
+                            </div>
+                            <button onclick="reply(this)" data-commentid="{{ $item->id }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition">
+                                <i class="fa fa-reply mr-1"></i>Reply
+                            </button>
+                        </div>
+                        
+                        <p class="text-gray-700 leading-relaxed">{{ $item->comment }}</p>
 
-         </form>
-         </div>
-      </div>
-     
+                        <!-- Replies -->
+                        @if($reply->where('comment_id', $item->id)->count() > 0)
+                            <div class="ml-10 mt-4 space-y-4 border-l-2 border-indigo-50 px-6 py-2">
+                                @foreach($reply->where('comment_id', $item->id) as $rep)
+                                    <div class="space-y-1">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-sm text-gray-900">{{ $rep->name }}</span>
+                                            <span class="text-[10px] text-gray-400">{{ $rep->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">{{ $rep->reply }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
 
+            <!-- Sticky Reply Box (Managed by JS) -->
+            <div id="replyContainer" class="hidden fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-xl z-50 px-4">
+                <div class="bg-white rounded-2xl shadow-2xl border border-indigo-100 p-6">
+                    <form action="{{ url('add_reply') }}" method="POST" class="space-y-4">
+                        @csrf
+                        <input type="hidden" id="commentId" name="commentId">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-gray-800 text-sm italic">Replying to comment...</h4>
+                            <button type="button" onclick="reply_close()" class="text-gray-400 hover:text-red-500 transition">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <textarea 
+                            name="reply" 
+                            rows="3" 
+                            class="w-full px-4 py-3 rounded-xl border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm" 
+                            placeholder="Write your reply..." 
+                            required
+                        ></textarea>
+                        <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-all">Send Reply</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <!-- Subscriptions & Socials -->
+    @include('home.subscribe')
+    @include('home.client')
 
+@endsection
 
+@push('scripts')
+    <script>
+        function reply(caller) {
+            document.getElementById('commentId').value = $(caller).attr('data-commentid');
+            $('#replyContainer').removeClass('hidden').addClass('animate-bounce-in');
+        }
 
+        function reply_close() {
+            $('#replyContainer').addClass('hidden');
+        }
 
-
-
-      <!-- comment and reply sytem ends here-->
-
-
-
-      <!-- end product section -->
-
-      <!-- subscribe section -->
-      @include('home.subscribe')
-      <!-- end subscribe section -->
-      <!-- client section -->
-        @include('home.client')
-      <!-- end client section -->
-      <!-- footer start -->
-      @include('home.footer')
-      <!-- footer end -->
-      <div class="cpy_">
-         <p class="mx-auto">© {{ date('Y') }} All Rights Reserved By <a href="https://noman1922.github.io/Portfolio/">Abdullah Al Nomna khan</a><br>
-         
-              <a href="https://noman1922.github.io/Portfolio/" target="_blank">This template is made with  by Abdullah Al Noman khan</a>
-         
-         </p>
-      </div>
-
-      <script>
-               function reply(caller) 
-               {
-                document.getElementById('commentId').value = $(caller).attr('data-commentid'); // lowercase c
-                $('.replyDiv').insertAfter($(caller));
-                $('.replyDiv').show();
-               }
-
-               function reply_close() 
-               {
-                $('.replyDiv').hide();
-               }
-      </script>
-
-      <script>
+        // Keep scroll position on reload
         document.addEventListener("DOMContentLoaded", function(event) { 
             var scrollpos = localStorage.getItem('scrollpos');
             if (scrollpos) window.scrollTo(0, scrollpos);
@@ -149,38 +149,14 @@
         window.onbeforeunload = function(e) {
             localStorage.setItem('scrollpos', window.scrollY);
         };
-      </script>
-
-
-
-      <!-- jQery -->
-      <script src="home/js/jquery-3.4.1.min.js"></script>
-      <!-- popper js -->
-      <script src="home/js/popper.min.js"></script>
-      <!-- bootstrap js -->
-      <script src="home/js/bootstrap.js"></script>
-      <!-- custom js -->
-      <script src="home/js/custom.js"></script>
-      <script src="{{ asset('vendor/sweetalert/sweetalert.all.js') }}"></script>
-@include('sweetalert::alert')
-
-      <!-- SweetAlert2 toast for payment success -->
-      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-      @if(session()->has('payment_success') || session()->has('success'))
-      <script>
-         document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-               toast: true,
-               position: 'top-end',
-               icon: 'success',
-               title: "{{ addslashes(session('payment_success') ?? session('success')) }}",
-               showConfirmButton: false,
-               timer: 4000,
-               timerProgressBar: true
-            });
-         });
-      </script>
-      @endif
-
-   </body>
-</html>
+    </script>
+    <style>
+        @keyframes bounce-in {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            100% { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .animate-bounce-in {
+            animation: bounce-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+    </style>
+@endpush

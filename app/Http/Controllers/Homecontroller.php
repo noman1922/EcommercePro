@@ -10,377 +10,109 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Comment;
 use App\Models\Reply;
-use RealRashid\SweetAlert\Facades\Alert;
-
-
+use Inertia\Inertia;
 use Session;
-
 use Stripe;
 
-
-
-class Homecontroller extends Controller
+class HomeController extends Controller
 {
-
     public function index()
     {
-        $product=Product::paginate(10);
-        $comment=Comment::orderby('id', 'desc')->get();
-        $reply=Reply::all();
-        return view('home.userpage', compact('product' , 'comment' , 'reply'));
+        $product = Product::paginate(12);
+        $comment = Comment::latest()->get();
+        $reply = Reply::all();
+
+        return Inertia::render('Home', [
+            'products' => $product,
+            'comments' => $comment,
+            'replies' => $reply,
+        ]);
     }
+
     public function redirect()
     {
-        $usertype=Auth::user()->usertype;
-        if ($usertype=='1')
-       {
-            $total_product=product::all()->count();
+        $usertype = Auth::user()->usertype;
+        
+        if ($usertype == '1') {
+            $total_product = Product::count();
+            $total_order = Order::count();
+            $total_user = User::count();
+            $order = Order::all();
+            $total_revenue = $order->sum('price');
 
-            $total_order=order::all()->count();
+            $total_delivered = Order::where('delivery_status', 'delivered')->count();
+            $total_processing = Order::where('delivery_status', 'processing')->count();
 
-            $total_user=user::all()->count();
-
-            $order=order::all();
-
-            $total_revenue=0;
-
-            foreach($order as $order)
-            {
-                $total_revenue= $total_revenue + $order->price;
-
-            }
-
-            $total_delavered=order::where('delivery_status', '=', 'delivered')->get()->count();
-            $toral_processing=order::where('delivery_status', '=', 'processing')->get()->count();
-       
-
-            
-            return view('admin.home', compact('total_product', 'total_order', 'total_user' ,'total_revenue', 'total_delavered', 'toral_processing'));
-        } 
-        else 
-        {
-            $product=Product::paginate(10);
-            $comment=Comment::orderby('id', 'desc')->get();
-            $reply=Reply::all();
-        return view('home.userpage', compact('product', 'comment' , 'reply'));
+            return view('admin.home', compact(
+                'total_product', 
+                'total_order', 
+                'total_user', 
+                'total_revenue', 
+                'total_delivered', 
+                'total_processing'
+            ));
+        } else {
+            return redirect('/');
         }
     }
+
     public function product_details($id)
     {
-        $product=Product::find($id);
-        return view('home.product_details', compact('product'));
-        
+        $product = Product::findOrFail($id);
+        return Inertia::render('ProductDetails', [
+            'product' => $product
+        ]);
     }
 
-    
-public function add_cart(Request $request, $id)
-{
-    // Require login
-    if (!Auth::check()) {
-        return redirect('login');
+    public function add_cart(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return redirect('login');
+        }
+
+        $request->validate([
+            'quantity' => 'nullable|integer|min:1',
+        ]);
+
+        $product = Product::findOrFail($id);
+
+        $cart = Cart::updateOrCreate(
+            ['product_id' => $product->id, 'user_id' => Auth::id()],
+            [
+                'product_title' => $product->title,
+                'image' => $product->image ?? '',
+                'quantity' => \DB::raw('quantity + ' . ($request->input('quantity', 1))),
+                'price' => \DB::raw('price + ' . (($product->discount_price ?? $product->price) * $request->input('quantity', 1))),
+                'name' => Auth::user()->name,
+                'email' => Auth::user()->email,
+            ]
+        );
+
+        return redirect()->back()->with('message', 'Product added to cart successfully!');
     }
-
-    // Validate quantity
-    $request->validate([
-        'quantity' => 'nullable|integer|min:1',
-    ]);
-
-    // Get the product
-    $product = Product::findOrFail($id);
-
-    // Check if this product already exists in user's cart
-    $cart = Cart::where('product_id', $product->id)
-        ->where('user_id', Auth::id())
-        ->first();
-
-    if ($cart) {
-        // Increase quantity
-        $cart->quantity += $request->input('quantity', 1);
-
-        // ✅ Use discount price if available, otherwise normal price
-        $pricePerItem = (!empty($product->discount_price) && $product->discount_price > 0)
-            ? $product->discount_price
-            : $product->price;
-
-        // Update total price based on quantity
-        $cart->price = $cart->quantity * $pricePerItem;
-
-        $cart->save();
-
-        // ✅ SweetAlert message for quantity update
-        \RealRashid\SweetAlert\Facades\Alert::success('Success', 'Product quantity updated in Cart');
-
-        return redirect()->back();
-    }
-
-    // Create new cart entry
-    $cart = new Cart();
-    $cart->user_id = Auth::id();
-    $cart->product_id = $product->id;
-    $cart->product_title = $product->title;
-    $cart->image = $product->image ?? '';
-    $cart->quantity = $request->input('quantity', 1);
-
-    // ✅ Use discount price if available
-    $pricePerItem = (!empty($product->discount_price) && $product->discount_price > 0)
-        ? $product->discount_price
-        : $product->price;
-
-    // Store total price for this product (quantity × unit price)
-    $cart->price = $cart->quantity * $pricePerItem;
-
-    // Optional user info fields
-    $cart->name = Auth::user()->name ?? 'user';
-    $cart->email = Auth::user()->email ?? '';
-    $cart->phone = $request->input('phone', '');
-    $cart->address = $request->input('address', '');
-
-    $cart->save();
-
-    // ✅ SweetAlert message for new add
-    \RealRashid\SweetAlert\Facades\Alert::success('Success', 'Product Added Successfully to Cart');
-
-    return redirect()->back();
-}
-
 
     public function show_cart()
     {
-        if (Auth::id())
-        {
-            $id=Auth::user()->id;
-            $cart=Cart::where('user_id', $id)->get();
-            return view('home.show_cart', compact('cart'));
+        if (Auth::id()) {
+            $cart = Cart::where('user_id', Auth::id())->get();
+            return Inertia::render('Cart', [
+                'cart' => $cart
+            ]);
         }
-        else
-        {
-            return redirect('login');
-        }
+        return redirect('login');
     }
+
     public function remove_cart($id)
     {
-        $cart=Cart::find($id);
-        $cart->delete();
+        Cart::findOrFail($id)->delete();
         return redirect()->back();
     }
-    
-    public function cash_order()
+
+    public function products()
     {
-        $user=Auth::user();
-        $userid=$user->id;
-
-        $data=Cart::where('user_id', $userid)->get();
-        foreach($data as $data)
-        {
-            $order=new Order;
-
-            $order->name=$user->name;
-            $order->email=$user->email;
-            $order->phone=$data->phone;
-            $order->address=$data->address;
-            $order->user_id=$data->user_id;
-
-
-            $order->product_title=$data->product_title;
-            $order->quantity=$data->quantity;
-            $order->price=$data->price;
-            $order->image=$data->image;
-            $order->product_id=$data->product_id;
-
-            $order->payment_status='cash on delivery';
-            $order->delivery_status='processing';
-
-            $order->save();
-
-            $cart_id=$data->id;
-            $cart=Cart::find($cart_id);
-            $cart->delete();
-
-
-
-        }
-        return redirect()->back()->with('message', 'We have received your order. We will connect with you soon...');
-
-
-    }
-    public function stripe($totalprice)
-    {
-        return view('home.stripe', compact('totalprice'));
-    }
-
-    public function stripePost(Request $request,$totalprice)
-
-    {
-       
-
-        Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-
-    
-
-        Stripe\Charge::create ([
-
-                "amount" => $totalprice * 100,
-
-                "currency" => "usd",
-
-                "source" => $request->stripeToken,
-
-                "description" => "Thanks for payment." 
-
+        $product = Product::paginate(12);
+        return Inertia::render('AllProducts', [
+            'products' => $product
         ]);
-
-
-        $user=Auth::user();
-        $userid=$user->id;
-
-        $data=Cart::where('user_id', $userid)->get();
-        foreach($data as $data)
-        {
-            $order=new Order;
-
-            $order->name=$user->name;
-            $order->email=$user->email;
-            $order->phone=$data->phone;
-            $order->address=$data->address;
-            $order->user_id=$data->user_id;
-
-
-            $order->product_title=$data->product_title;
-            $order->quantity=$data->quantity;
-            $order->price=$data->price;
-            $order->image=$data->image;
-            $order->product_id=$data->product_id;
-
-            $order->payment_status='Paid';
-            $order->delivery_status='processing';
-
-            $order->save();
-
-            $cart_id=$data->id;
-            $cart=Cart::find($cart_id);
-            $cart->delete();
-
-
-
-        }
-
-      
-
-        Session::flash('success', 'Payment successful!');
-
-              
-
-        return back();
-
     }
-    public function show_order()
-    {
-        if (Auth::id())
-        {
-            $user=Auth::user();
-            $userid=$user->id;
-            $order=Order::where('user_id', $userid)->get();
-            return view('home.order', compact('order'));
-        }
-        else
-        {
-            return redirect('login');
-        }
-    }
-
-    public function cancel_order($id)
-    {
-        $order=order::find($id);
-        $order->delivery_status='You Cancelled the Order';
-        $order->save();
-        return redirect()->back();
-    }
-
-    public function add_comment(Request $request)
-    {
-       if(Auth::id())
-       {
-        
-
-        $comment=new Comment;
-
-        $comment->name=Auth::user()->name;
-
-        $comment->user_id=Auth::user()->id;
-
-        $comment->comment=$request->comment;
-
-        $comment->save();
-
-        return redirect()->back();
-
-       }
-       else{
-
-        return redirect('login');
-       }
-
-        
-    }
-    public function add_reply(Request $request)
-    {
-       if(Auth::id())
-       {
-        
-
-        $reply=new reply;
-
-        $reply->name=Auth::user()->name;
-
-        $reply->user_id=Auth::user()->id;
-
-        $reply->comment_id=$request->commentId;
-
-        $reply->reply=$request->reply;
-
-        $reply->save();
-
-        return redirect()->back();
-
-       }
-       else{
-
-        return redirect('login');
-       }
-
-        
-    }
-
-    public function product_search(Request $request)
-    {
-        $search_text=$request->search;
-        $product=Product::where('title','LIKE',"%$search_text%")->orWhere('catagory','LIKE',"%$search_text%")->paginate(10);
-        $comment=Comment::orderby('id', 'desc')->get();
-        $reply=Reply::all();
-        return view('home.userpage', compact('product' , 'comment' , 'reply'));
-    }
-    
-   public function products()
-    {
-    $product = Product::paginate(10);
-    $comment = Comment::orderBy('id', 'desc')->get();
-    $reply = Reply::all();
-    return view('home.all_product', compact('product', 'comment', 'reply'));
-    }
-    
-
-    public function search_product(Request $request)
-    {
-        $search_text=$request->search;
-        $product=Product::where('title','LIKE',"%$search_text%")->orWhere('catagory','LIKE',"%$search_text%")->paginate(10);
-        $comment=Comment::orderby('id', 'desc')->get();
-        $reply=Reply::all();
-        return view('home.all_product', compact('product' , 'comment' , 'reply'));
-    }
-
-  
-
-
-    
-    
 }

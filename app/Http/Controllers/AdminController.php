@@ -193,6 +193,7 @@ class AdminController extends Controller
     public function send_user_email(Request $request, $id)
     {
         if (Auth::id()) {
+            /* 
             $order = Order::find($id);
 
             $details = [
@@ -205,8 +206,9 @@ class AdminController extends Controller
             ];
 
             Notification::send($order, new SendEmailNotification($details));
+            */
 
-            return redirect()->back()->with('message', 'Email Sent Successfully');
+            return redirect()->back()->with('message', 'Email functionality is currently disabled.');
         } else {
             return redirect('login');
         }
