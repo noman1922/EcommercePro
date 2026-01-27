@@ -22,11 +22,7 @@ class HomeController extends Controller
         $comment = Comment::latest()->get();
         $reply = Reply::all();
 
-        return Inertia::render('Home', [
-            'products' => $product,
-            'comments' => $comment,
-            'replies' => $reply,
-        ]);
+        return view('home.userpage', compact('product', 'comment', 'reply'));
     }
 
     public function redirect()
@@ -59,9 +55,7 @@ class HomeController extends Controller
     public function product_details($id)
     {
         $product = Product::findOrFail($id);
-        return Inertia::render('ProductDetails', [
-            'product' => $product
-        ]);
+        return view('home.product_details', compact('product'));
     }
 
     public function add_cart(Request $request, $id)
@@ -95,9 +89,7 @@ class HomeController extends Controller
     {
         if (Auth::id()) {
             $cart = Cart::where('user_id', Auth::id())->get();
-            return Inertia::render('Cart', [
-                'cart' => $cart
-            ]);
+            return view('home.show_cart', compact('cart'));
         }
         return redirect('login');
     }
@@ -111,8 +103,6 @@ class HomeController extends Controller
     public function products()
     {
         $product = Product::paginate(12);
-        return Inertia::render('AllProducts', [
-            'products' => $product
-        ]);
+        return view('home.all_product', compact('product'));
     }
 }
